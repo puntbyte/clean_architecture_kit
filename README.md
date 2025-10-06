@@ -1,19 +1,21 @@
 # Clean Architecture Kit
 
-[![pub version][pub_version_badge]][pub_package]
-[![likes][likes_badge]][pub_package]
-[![pub points][pub_points_badge]][pub_package]
-[![license][license_badge]][license_file]
-
-A powerful and highly configurable linter toolkit for enforcing Clean Architecture principles in Dart & Flutter projects. It not only finds architectural violations but provides powerful quick fixes to generate your boilerplate for you.
+A powerful and highly configurable linter toolkit for enforcing Clean Architecture principles in 
+Dart & Flutter projects. It not only finds architectural violations but provides powerful quick 
+fixes to generate your boilerplate for you.
 
 ## Features
 
--   ✅ **Comprehensive Lints:** Enforce layer purity, dependency direction, naming conventions, and more.
--   🚀 **Intelligent Code Generation:** Automatically generate complete `UseCase` classes from your `Repository` interfaces with a single click.
--   📦 **Works Out-of-the-Box:** Includes built-in base classes (`Repository`, `UseCase`, `FutureEither`) for instant productivity.
--   🔧 **Highly Configurable:** Customize everything from folder names to class naming conventions to fit your team's style guide.
--   🏗️ **Future-Proof Design:** Built to be extensible for other architectural patterns in the future.
+- ✅ **Comprehensive Lints:** Enforce layer purity, dependency direction, naming conventions, and 
+  more.
+- 🚀 **Intelligent Code Generation:** Automatically generate complete `UseCase` classes from your 
+  `Repository` interfaces with a single click.
+- 📦 **Works Out-of-the-Box:** Includes built-in base classes (`Repository`, `UseCase`, 
+  `FutureEither`) for instant productivity.
+- 🔧 **Highly Configurable:** Customize everything from folder names to class naming conventions 
+  to fit your team's style guide.
+- 🏗️ **Future-Proof Design:** Built to be extensible for other architectural patterns in the 
+  future.
 
 ---
 
@@ -30,7 +32,8 @@ dart pub add --dev clean_architecture_kit
 
 ### 2. Configuration
 
-Create an `analysis_options.yaml` file in the root of your project and paste the full configuration below. This provides a comprehensive setup that works out-of-the-box with the included base classes.
+Create an `analysis_options.yaml` file in the root of your project and paste the full configuration 
+below. This provides a comprehensive setup that works out-of-the-box with the included base classes.
 
 <details>
 <summary>Click to expand the full analysis_options.yaml configuration</summary>
@@ -145,7 +148,8 @@ custom_lint:
 
 ### 3. Usage
 
-You can now import the provided base classes directly from the kit and start coding. The linter will guide you.
+You can now import the provided base classes directly from the kit and start coding. The linter 
+will guide you.
 
 **Example `auth_repository.dart`:**
 
@@ -165,9 +169,11 @@ abstract interface class AuthRepository extends Repository {
 
 ## Code Generation in Action
 
-The killer feature of `clean_architecture_kit` is its ability to write your `UseCase` boilerplate for you.
+The killer feature of `clean_architecture_kit` is its ability to write your `UseCase` boilerplate 
+for you.
 
-When the `missing_use_case` lint detects a repository method without a corresponding use case, it will show an informational warning.
+When the `missing_use_case` lint detects a repository method without a corresponding use case, it 
+will show an informational warning.
 
 1.  Place your cursor on the method name (e.g., `getUser`).
 2.  Trigger the quick fix menu (usually `Ctrl + .` or `Cmd + .`).
