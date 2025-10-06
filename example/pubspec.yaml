@@ -2,6 +2,8 @@ name: example
 description: A demonstration project for the clean_architecture_kit package.
 version: 1.0.0
 
+repository: https://github.com/puntbyte/clean_architecture_kit
+
 publish_to: 'none'
 
 environment:
