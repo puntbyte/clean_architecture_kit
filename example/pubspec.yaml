@@ -1,0 +1,29 @@
+name: example
+description: A demonstration project for the clean_architecture_kit package.
+version: 1.0.0
+
+publish_to: 'none'
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  bloc: any
+  flutter_bloc: any
+
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  fpdart: ^1.1.1
+  injectable: ^2.5.2
+
+dev_dependencies:
+  custom_lint: 0.8.1
+
+  clean_architecture_kit:
+    path: ../
+
+flutter:
+  uses-material-design: true
