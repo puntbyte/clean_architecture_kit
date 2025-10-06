@@ -1,3 +1,8 @@
+## 1.0.1
+
+* **Fixed:** `pubspec.yaml` dependencies to reduce conflicts.
+    
+
 ## 1.0.0
 
 * **Initial stable release of `clean_architecture_kit`.**

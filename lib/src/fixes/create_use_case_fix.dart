@@ -86,8 +86,9 @@ class CreateUseCaseFix extends Fix {
     final unaryPath = config.inheritance.unaryUseCasePath;
     if (unaryPath.isNotEmpty) builder.importLibrary(Uri.parse(unaryPath));
     final nullaryPath = config.inheritance.nullaryUseCasePath;
-    if (nullaryPath.isNotEmpty && nullaryPath != unaryPath)
+    if (nullaryPath.isNotEmpty && nullaryPath != unaryPath) {
       builder.importLibrary(Uri.parse(nullaryPath));
+    }
     for (var path in config.typeSafety.importPaths) {
       if (path.isNotEmpty) builder.importLibrary(Uri.parse(path));
     }
