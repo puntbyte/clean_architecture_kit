@@ -1,5 +1,10 @@
 # Clean Architecture Kit
 
+[![pub version][pub_version_badge]][pub_package]
+[![likes][likes_badge]][pub_package]
+[![pub points][pub_points_badge]][pub_package]
+[![license][license_badge]][license_file]
+
 A powerful and highly configurable linter toolkit for enforcing Clean Architecture principles in 
 Dart & Flutter projects. It not only finds architectural violations but provides powerful quick 
 fixes to generate your boilerplate for you.
@@ -205,3 +210,10 @@ The kit will instantly generate a new, fully correct, and formatted file.
 | `enforce_repository_inheritance`          | Ensures repository interfaces extend a configured base class.                                   |
 | **Code Generation**                       |                                                                                                 |
 | `missing_use_case`                        | Detects repository methods that are missing a use case and provides a quick fix to generate it. |
+
+[pub_version_badge]: https://img.shields.io/pub/v/clean_architecture_kit.svg
+[likes_badge]: https://img.shields.io/pub/likes/clean_architecture_kit
+[pub_points_badge]: https://img.shields.io/pub/points/clean_architecture_kit
+[license_badge]: https://img.shields.io/github/license/buntbyte/clean_architecture_kit
+[pub_package]: https://pub.dev/packages/clean_architecture_kit
+[license_file]: https://github.com/puntbyte/clean_architecture_kit/blob/master/LICENSE
