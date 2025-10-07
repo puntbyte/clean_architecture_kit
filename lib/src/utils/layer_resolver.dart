@@ -62,16 +62,19 @@ class LayerResolver {
     // Each check now uses the correct property from the LayerConfig model.
     if (layer == ArchLayer.domain) {
       if (layerConfig.domainEntitiesPaths.any(segments.contains)) return ArchSubLayer.entity;
-      if (layerConfig.domainRepositoriesPaths.any(segments.contains))
+      if (layerConfig.domainRepositoriesPaths.any(segments.contains)) {
         return ArchSubLayer.domainRepository;
+      }
       if (layerConfig.domainUseCasesPaths.any(segments.contains)) return ArchSubLayer.useCase;
     } else if (layer == ArchLayer.data) {
-      if (layerConfig.dataRepositoriesPaths.any(segments.contains))
+      if (layerConfig.dataRepositoriesPaths.any(segments.contains)) {
         return ArchSubLayer.dataRepository;
+      }
       if (layerConfig.dataDataSourcesPaths.any(segments.contains)) return ArchSubLayer.dataSource;
     } else if (layer == ArchLayer.presentation) {
-      if (layerConfig.presentationManagerPaths.any(segments.contains))
+      if (layerConfig.presentationManagerPaths.any(segments.contains)) {
         return ArchSubLayer.presentationManager;
+      }
     }
     // --- END OF FIX ---
 
