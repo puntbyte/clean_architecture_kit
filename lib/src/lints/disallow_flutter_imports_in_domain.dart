@@ -1,4 +1,4 @@
-import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
+import 'package:analyzer/error/error.dart' show ErrorSeverity;
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
@@ -12,7 +12,7 @@ class DisallowFlutterImportsInDomain extends DartLintRule {
     name: 'disallow_flutter_imports_in_domain',
     problemMessage: 'Do not import Flutter packages in the domain layer.',
     correctionMessage: 'The domain layer must be platform-independent. Remove this import.',
-    errorSeverity: DiagnosticSeverity.WARNING,
+    errorSeverity: ErrorSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
@@ -22,7 +22,7 @@ class DisallowFlutterImportsInDomain extends DartLintRule {
     : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
     // Determine the layer of the current file.
     final layer = layerResolver.getLayer(resolver.source.fullName);
     // Only run this lint on files within the domain layer.

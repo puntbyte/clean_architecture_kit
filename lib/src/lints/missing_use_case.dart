@@ -1,14 +1,11 @@
-import 'dart:io';
-
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
+import 'package:analyzer/error/error.dart' show ErrorSeverity;
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
 import 'package:clean_architecture_kit/src/config/models/architecture_kit_config.dart';
 import 'package:clean_architecture_kit/src/fixes/create_use_case_fix.dart';
 import 'package:clean_architecture_kit/src/utils/layer_resolver.dart';
-// Import the shared, robust utilities
 import 'package:clean_architecture_kit/src/utils/path_utils.dart';
 
 class MissingUseCase extends DartLintRule {
@@ -16,7 +13,7 @@ class MissingUseCase extends DartLintRule {
     name: 'missing_use_case',
     problemMessage: 'Repository method `{0}` is missing a corresponding UseCase file.',
     correctionMessage: 'Consider creating a UseCase for this business logic.',
-    errorSeverity: DiagnosticSeverity.INFO,
+    errorSeverity: ErrorSeverity.INFO,
   );
 
   final CleanArchitectureConfig config;
@@ -28,7 +25,7 @@ class MissingUseCase extends DartLintRule {
   List<Fix> getFixes() => [CreateUseCaseFix(config: config)];
 
   @override
-  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
     final subLayer = layerResolver.getSubLayer(resolver.source.fullName);
     if (subLayer != ArchSubLayer.domainRepository) return;
 
@@ -47,8 +44,8 @@ class MissingUseCase extends DartLintRule {
           );
 
           if (expectedFilePath != null) {
-            final file = File(expectedFilePath);
-            if (!file.existsSync()) {
+            // This helper function checks both the in-memory cache and the disk.
+            if (!useCaseFileExists(expectedFilePath)) {
               reporter.atToken(member.name, _code, arguments: [methodName]);
             }
           }

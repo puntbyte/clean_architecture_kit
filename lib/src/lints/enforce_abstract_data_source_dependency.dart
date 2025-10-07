@@ -1,5 +1,5 @@
 import 'package:analyzer/diagnostic/diagnostic.dart';
-import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
+import 'package:analyzer/error/error.dart' show ErrorSeverity, AnalysisError;
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
@@ -17,7 +17,7 @@ class EnforceAbstractDataSourceDependency extends DartLintRule {
     problemMessage:
         'Repository implementations must depend on data source abstractions, not '
         'concrete implementations.',
-    errorSeverity: DiagnosticSeverity.WARNING,
+    errorSeverity: ErrorSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
@@ -27,7 +27,7 @@ class EnforceAbstractDataSourceDependency extends DartLintRule {
     : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
     // This lint should only run on files located in a data repository directory.
     final subLayer = layerResolver.getSubLayer(resolver.source.fullName);
     if (subLayer != ArchSubLayer.dataRepository) return;
@@ -61,11 +61,11 @@ class EnforceAbstractDataSourceDependency extends DartLintRule {
 
           // Report the error using `reportError` to provide the dynamic correction message.
           reporter.reportError(
-            Diagnostic.forValues(
+            AnalysisError.forValues(
               source: resolver.source,
               offset: parameter.offset,
               length: parameter.length,
-              diagnosticCode: _code,
+              errorCode: _code,
               message: _code.problemMessage,
               correctionMessage: 'Depend on the `$abstractName` interface instead of `$typeName`.',
             ),

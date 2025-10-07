@@ -1,4 +1,4 @@
-import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
+import 'package:analyzer/error/error.dart' show ErrorSeverity;
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
@@ -11,7 +11,7 @@ class EnforceLayerIndependence extends DartLintRule {
     problemMessage: 'Invalid layer dependency: The {0} layer cannot import from the {1} layer.',
     correctionMessage:
         'Ensure dependencies flow inwards (e.g., Presentation -> Domain, Data -> Domain).',
-    errorSeverity: DiagnosticSeverity.WARNING,
+    errorSeverity: ErrorSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
@@ -21,12 +21,12 @@ class EnforceLayerIndependence extends DartLintRule {
     : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
     final currentLayer = layerResolver.getLayer(resolver.source.fullName);
     if (currentLayer == ArchLayer.unknown) return;
 
     context.registry.addImportDirective((node) {
-      final importPath = node.libraryImport?.importedLibrary?.firstFragment.source.fullName;
+      final importPath = node.libraryImport?.importedLibrary2?.firstFragment.source.fullName;
       if (importPath == null) return;
 
       final importedLayer = layerResolver.getLayer(importPath);

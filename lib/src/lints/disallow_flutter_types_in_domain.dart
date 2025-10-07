@@ -1,6 +1,6 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
+import 'package:analyzer/error/error.dart' show ErrorSeverity;
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
@@ -14,7 +14,7 @@ class DisallowFlutterTypesInDomain extends DartLintRule {
     name: 'disallow_flutter_types_in_domain',
     problemMessage: 'Domain layer purity violation: Do not use types from the Flutter SDK.',
     correctionMessage: 'Replace this Flutter type with a pure Dart type or a domain Entity.',
-    errorSeverity: DiagnosticSeverity.WARNING,
+    errorSeverity: ErrorSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
@@ -24,7 +24,7 @@ class DisallowFlutterTypesInDomain extends DartLintRule {
     : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
     final layer = layerResolver.getLayer(resolver.source.fullName);
     if (layer != ArchLayer.domain) return;
 
@@ -63,7 +63,7 @@ class DisallowFlutterTypesInDomain extends DartLintRule {
   bool _isFlutterType(DartType type) {
     final library = type.element?.library;
     if (library != null) {
-      final uri = library.firstFragment.source.uri;
+      final uri = library.library.source.uri;
       // Check if the type's source URI is a package and if that package is 'flutter'.
       if (uri.isScheme('package') && uri.pathSegments.first == 'flutter') {
         return true;

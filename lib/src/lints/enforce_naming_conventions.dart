@@ -1,4 +1,4 @@
-import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
+import 'package:analyzer/error/error.dart' show ErrorSeverity;
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 import '../config/models/architecture_kit_config.dart';
@@ -9,7 +9,7 @@ class EnforceNamingConventions extends DartLintRule {
   static const _code = LintCode(
     name: 'enforce_naming_conventions',
     problemMessage: 'The class name `{0}` does not match the configured format: `{1}`.',
-    errorSeverity: DiagnosticSeverity.WARNING,
+    errorSeverity: ErrorSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
@@ -19,7 +19,7 @@ class EnforceNamingConventions extends DartLintRule {
     : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
     final subLayer = layerResolver.getSubLayer(resolver.source.fullName);
     if (subLayer == ArchSubLayer.unknown) return;
 

@@ -1,4 +1,4 @@
-import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
+import 'package:analyzer/error/error.dart' show ErrorSeverity;
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 import '../config/models/architecture_kit_config.dart';
@@ -9,7 +9,7 @@ class EnforceRepositoryInheritance extends DartLintRule {
     name: 'enforce_repository_inheritance',
     problemMessage:
         'Repository interfaces must extend or implement the base repository class `{0}`.',
-    errorSeverity: DiagnosticSeverity.WARNING,
+    errorSeverity: ErrorSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
@@ -19,7 +19,7 @@ class EnforceRepositoryInheritance extends DartLintRule {
     : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
     final subLayer = layerResolver.getSubLayer(resolver.source.fullName);
     if (subLayer != ArchSubLayer.domainRepository) return;
 
@@ -34,7 +34,7 @@ class EnforceRepositoryInheritance extends DartLintRule {
 
       // Check the 'extends' clause
       final extendsClause = node.extendsClause;
-      if (extendsClause != null && extendsClause.superclass.name.lexeme == baseClassName) {
+      if (extendsClause != null && extendsClause.superclass.name2.lexeme == baseClassName) {
         hasCorrectSuperclass = true;
       }
 
@@ -43,7 +43,7 @@ class EnforceRepositoryInheritance extends DartLintRule {
         final implementsClause = node.implementsClause;
         if (implementsClause != null) {
           for (final interface in implementsClause.interfaces) {
-            if (interface.name.lexeme == baseClassName) {
+            if (interface.name2.lexeme == baseClassName) {
               hasCorrectSuperclass = true;
               break;
             }

@@ -1,6 +1,5 @@
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/diagnostic/diagnostic.dart';
-import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
+import 'package:analyzer/error/error.dart' show ErrorSeverity, AnalysisError;
 import 'package:analyzer/error/listener.dart';
 import 'package:clean_architecture_kit/src/config/models/architecture_kit_config.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
@@ -20,7 +19,7 @@ class DomainLayerPurity extends DartLintRule {
     problemMessage: 'Domain layer purity violation.', // Generic message for the rule code.
     correctionMessage:
         'The Domain layer must be pure and not depend on outer layers or implementation details.',
-    errorSeverity: DiagnosticSeverity.WARNING,
+    errorSeverity: ErrorSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
@@ -29,7 +28,7 @@ class DomainLayerPurity extends DartLintRule {
   DomainLayerPurity({required this.config, required this.layerResolver}) : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
     // Only run this lint on files within the domain layer.
     final layer = layerResolver.getLayer(resolver.source.fullName);
     if (layer != ArchLayer.domain) return;
@@ -41,28 +40,28 @@ class DomainLayerPurity extends DartLintRule {
 
       if (importUri.startsWith('package:flutter/')) {
         reporter.reportError(
-          Diagnostic.forValues(
+          AnalysisError.forValues(
             source: resolver.source,
             offset: node.offset,
             length: node.length,
-            diagnosticCode: _code,
+            errorCode: _code,
             message: 'Domain layer cannot import Flutter packages.',
           ),
         );
         return;
       }
 
-      final importPath = node.libraryImport?.importedLibrary?.firstFragment.source.fullName;
+      final importPath = node.libraryImport?.importedLibrary2?.firstFragment.source.fullName;
       if (importPath == null) return;
       final importedLayer = layerResolver.getLayer(importPath);
 
       if (importedLayer == ArchLayer.data || importedLayer == ArchLayer.presentation) {
         reporter.reportError(
-          Diagnostic.forValues(
+          AnalysisError.forValues(
             source: resolver.source,
             offset: node.offset,
             length: node.length,
-            diagnosticCode: _code,
+            errorCode: _code,
             message: 'Domain layer cannot import from the ${importedLayer.name} layer.',
           ),
         );
@@ -89,22 +88,22 @@ class DomainLayerPurity extends DartLintRule {
   void _checkTypeRecursively(
     TypeAnnotation? typeNode,
     CustomLintResolver resolver,
-    DiagnosticReporter reporter,
+    ErrorReporter reporter,
   ) {
     if (typeNode == null) return;
 
     // Case 1: The type is a simple named type (e.g., `UserModel` or `FutureEither`).
     if (typeNode is NamedType) {
-      final typeName = typeNode.name.lexeme;
+      final typeName = typeNode.name2.lexeme;
 
       // Check if this specific name matches the model convention.
       if (validateName(name: typeName, template: config.naming.model)) {
         reporter.reportError(
-          Diagnostic.forValues(
+          AnalysisError.forValues(
             source: resolver.source,
             offset: typeNode.offset,
             length: typeNode.length,
-            diagnosticCode: _code,
+            errorCode: _code,
             message:
                 'Do not use Model `$typeName` in a domain layer signature. Use a pure Entity instead.',
           ),

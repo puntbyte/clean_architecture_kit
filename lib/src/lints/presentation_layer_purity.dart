@@ -1,5 +1,5 @@
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
+import 'package:analyzer/error/error.dart' show ErrorSeverity;
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
@@ -14,7 +14,7 @@ class PresentationLayerPurity extends DartLintRule {
     correctionMessage:
         'The presentation layer should depend on a specific UseCase, not the entire '
         'repository.',
-    errorSeverity: DiagnosticSeverity.WARNING,
+    errorSeverity: ErrorSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
@@ -23,7 +23,7 @@ class PresentationLayerPurity extends DartLintRule {
   PresentationLayerPurity({required this.config, required this.layerResolver}) : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
     final layer = layerResolver.getLayer(resolver.source.fullName);
     if (layer != ArchLayer.presentation) return;
 

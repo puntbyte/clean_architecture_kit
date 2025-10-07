@@ -1,10 +1,8 @@
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/diagnostic/diagnostic.dart';
-// This is a deliberate import of an internal API from the analyzer package.
-// NodeLocator2 is essential for finding the AST node from a diagnostic's location
-// and is not part of the public API. This is a common and accepted practice for
-// advanced static analysis tools.
+// Deliberate import of internal AST locator utility used by many analyzer plugins.
 // ignore: implementation_imports
 import 'package:analyzer/src/dart/ast/utilities.dart';
 import 'package:analyzer_plugin/utilities/change_builder/change_builder_dart.dart';
@@ -18,10 +16,6 @@ import 'package:clean_architecture_kit/src/utils/path_utils.dart';
 import 'package:clean_architecture_kit/src/utils/string_utils.dart';
 import 'package:clean_architecture_kit/src/utils/syntax_builder.dart';
 
-/// A "quick fix" that generates a new use case file based on a method
-/// signature from a repository interface.
-///
-/// This fix is associated with the `missing_use_case` lint rule.
 class CreateUseCaseFix extends Fix {
   final CleanArchitectureConfig config;
   CreateUseCaseFix({required this.config});
@@ -31,12 +25,12 @@ class CreateUseCaseFix extends Fix {
 
   @override
   void run(
-    CustomLintResolver resolver,
-    ChangeReporter reporter,
-    CustomLintContext context,
-    Diagnostic diagnostic,
-    List<Diagnostic> others,
-  ) {
+      CustomLintResolver resolver,
+      ChangeReporter reporter,
+      CustomLintContext context,
+      Diagnostic diagnostic,
+      List<Diagnostic> others,
+      ) {
     context.addPostRunCallback(() async {
       final resolvedUnit = await resolver.getResolvedUnitResult();
       final locator = NodeLocator2(diagnostic.problemMessage.offset);
@@ -68,6 +62,8 @@ class CreateUseCaseFix extends Fix {
         ).format(unformattedCode);
         builder.addInsertion(0, (editBuilder) => editBuilder.write(formattedCode));
       });
+
+      markUseCaseAsCreated(useCaseFilePath);
     });
   }
 
@@ -76,7 +72,7 @@ class CreateUseCaseFix extends Fix {
     required MethodDeclaration method,
     required ClassDeclaration repoNode,
   }) {
-    final repoLibrary = repoNode.declaredFragment?.element.library;
+    final repoLibrary = repoNode.declaredFragment?.element.library2;
     if (repoLibrary != null) builder.importLibrary(repoLibrary.firstFragment.source.uri);
 
     for (var annotation in config.generation.useCaseAnnotations) {
@@ -94,36 +90,37 @@ class CreateUseCaseFix extends Fix {
     }
 
     for (final param in method.parameters?.parameters ?? []) {
-      _importType(param.declaredFragment?.element?.type, builder);
+      // This logic, inspired by your snippet, is key. It gets the *actual* parameter
+      // element, whether it's wrapped in a `DefaultFormalParameter` or not.
+      final element = param.declaredElement;
+      _importType(element?.type, builder);
     }
 
     final returnType = method.returnType?.type;
-    if (returnType is InterfaceType && returnType.typeArguments.isNotEmpty) {
-      for (final arg in returnType.typeArguments) {
-        _importType(arg, builder);
-      }
-    }
+    _importType(returnType, builder);
   }
 
+  // This is the corrected, robust import logic.
   void _importType(DartType? type, DartFileEditBuilder builder) {
     if (type == null) return;
 
-    // --- THIS IS THE DEFINITIVE FIX ---
-    // If the type is generic, we only care about importing its arguments,
-    // not the container type itself (like `Future` or `Either`).
-    if (type is InterfaceType && type.typeArguments.isNotEmpty) {
+    if (type is RecordType) {
+      for (final field in type.positionalFields) {
+        _importType(field.type, builder);
+      }
+      for (final field in type.namedFields) {
+        _importType(field.type, builder);
+      }
+    } else if (type is InterfaceType && type.typeArguments.isNotEmpty) {
       for (final arg in type.typeArguments) {
-        // Recurse on the inner types.
         _importType(arg, builder);
       }
-    } else {
-      // This is a non-generic type. We can safely import it.
-      final library = type.element?.library;
-      if (library != null && !library.isInSdk) {
-        builder.importLibrary(library.firstFragment.source.uri);
-      }
     }
-    // --- END OF FIX ---
+
+    final library = type.element3?.library2;
+    if (library != null && !library.isInSdk) {
+      builder.importLibrary(library.library2.uri);
+    }
   }
 
   cb.Library _buildUseCaseLibrary({
@@ -148,16 +145,18 @@ class CreateUseCaseFix extends Fix {
       baseClassName = config.inheritance.unaryUseCaseName;
       if (params.length == 1) {
         final param = params.first;
-        final paramType = cb.refer(param.type?.toSource() ?? 'dynamic');
-        final paramName = param.name?.lexeme ?? 'param';
+        final element = param.declaredElement!;
+        final paramType = cb.refer(element.type.getDisplayString(withNullability: true));
+        final paramName = element.name;
         genericTypes.add(paramType);
         callParams.add(SyntaxBuilder.parameter(name: paramName, type: paramType));
-        if (param.isNamed) {
+        if (element.isNamed) {
           repoCallArgs[paramName] = cb.refer(paramName);
         } else {
           repoCallPositionalArgs.add(cb.refer(paramName));
         }
       } else {
+        // THIS IS THE FINAL, CORRECTED LOGIC FOR MULTIPLE PARAMETERS
         final useCaseNamePascal = toPascalCase(methodName);
         final recordName = config.naming.useCaseRecordParameter.replaceAll(
           '{{name}}',
@@ -167,28 +166,38 @@ class CreateUseCaseFix extends Fix {
         genericTypes.add(recordRef);
         callParams.add(SyntaxBuilder.parameter(name: 'params', type: recordRef));
 
-        final recordType = cb.RecordType((b) {
-          for (final p in params) {
-            final element = p.declaredFragment?.element;
-            if (element == null) continue;
-            b.namedFieldTypes[element.name] = cb.refer(
-              element.type.getDisplayString(withNullability: true),
-            );
+        final recordTypeBuilder = cb.RecordTypeBuilder();
+        int positionalIndex = 1;
+
+        for (final p in params) {
+          // Using `declaredElement` is the reliable way to get parameter info.
+          final element = p.declaredElement;
+          if (element == null) continue;
+
+          final paramTypeRef = cb.refer(element.type.getDisplayString(withNullability: true));
+
+          // Correctly distinguish between named and positional parameters
+          if (element.isNamed) {
+            recordTypeBuilder.namedFieldTypes[element.name] = paramTypeRef;
             repoCallArgs[element.name] = cb.refer('params').property(element.name);
+          } else {
+            recordTypeBuilder.positionalFieldTypes.add(paramTypeRef);
+            repoCallPositionalArgs.add(cb.refer('params').property('\$${positionalIndex++}'));
           }
-        });
+        }
+
         elements.add(
           cb.TypeDef(
-            (b) => b
+                (b) => b
               ..name = recordName
-              ..definition = recordType,
+              ..definition = recordTypeBuilder.build(),
           ),
         );
       }
     }
 
     final implementsType = cb.TypeReference(
-      (b) => b
+          (b) => b
         ..symbol = baseClassName
         ..types.addAll(genericTypes),
     );
@@ -209,7 +218,6 @@ class CreateUseCaseFix extends Fix {
           name: 'repository',
           modifier: cb.FieldModifier.final$,
           type: cb.refer(repoNode.name.lexeme),
-          annotations: [cb.refer('override')],
         ),
       ],
       constructors: [

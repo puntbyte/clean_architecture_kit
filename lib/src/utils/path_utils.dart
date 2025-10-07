@@ -5,6 +5,32 @@ import 'package:path/path.dart' as p;
 import '../config/models/architecture_kit_config.dart';
 import 'naming_utils.dart';
 
+/// In-memory registry of use-case files that were just created by the quick-fix.
+/// This prevents repeatedly reporting the same missing-use-case diagnostic
+/// while the analysis server is catching up and/or before the file appears on disk.
+final Set<String> _recentlyCreatedUseCases = <String>{};
+
+/// Mark a use-case path as created for the current session/analysis run.
+void markUseCaseAsCreated(String path) {
+  _recentlyCreatedUseCases.add(p.normalize(path));
+}
+
+/// Checks if a use case file exists, either because it was just created (in-memory cache)
+/// or because it's already on disk.
+bool useCaseFileExists(String path) {
+  if (_recentlyCreatedUseCases.contains(p.normalize(path))) {
+    return true;
+  }
+  try {
+    return File(path).existsSync();
+  } catch (_) {
+    return false;
+  }
+}
+
+/// Optionally clear the in-memory registry (useful for tests).
+void clearMarkedUseCases() => _recentlyCreatedUseCases.clear();
+
 /// Finds the project root directory by searching upwards for a `pubspec.yaml` file.
 String? findProjectRoot(String fileAbsolutePath) {
   var dir = Directory(p.dirname(fileAbsolutePath));
@@ -25,7 +51,7 @@ String? getUseCasesDirectoryPath(String repoPath, CleanArchitectureConfig config
   final normalized = p.normalize(repoPath);
   final libIndex = normalized.indexOf(p.join('lib', ''));
   if (libIndex == -1) return null;
-  final insideLib = normalized.substring(libIndex + 4);
+  final insideLib = normalized.substring(libIndex + 4); // skip 'lib/'
 
   final layerCfg = config.layers;
 
@@ -57,7 +83,7 @@ String? getUseCaseFilePath({
 
   final useCaseClassName = getExpectedUseCaseClassName(methodName, config);
   final useCaseFileName = '${toSnakeCase(useCaseClassName)}.dart';
-  return p.join(useCaseDir, useCaseFileName);
+  return p.normalize(p.join(useCaseDir, useCaseFileName));
 }
 
 bool isPathInEntityDirectory(String path, CleanArchitectureConfig config) {
@@ -68,8 +94,6 @@ bool isPathInEntityDirectory(String path, CleanArchitectureConfig config) {
   final normalizedPath = p.normalize(path);
   final segments = normalizedPath.split(p.separator);
 
-  // A heuristic: check if the path contains a directory named 'domain'
-  // followed by one of the configured entity directory names.
   final domainDirName = layerConfig.projectStructure == 'layer_first'
       ? layerConfig.domainPath
       : 'domain';
@@ -77,7 +101,6 @@ bool isPathInEntityDirectory(String path, CleanArchitectureConfig config) {
   final domainIndex = segments.lastIndexOf(domainDirName);
   if (domainIndex == -1) return false;
 
-  // Check if any of the configured entity directories appear after the domain directory.
   for (final entityDir in layerConfig.domainRepositoriesPaths) {
     final entityIndex = segments.lastIndexOf(entityDir);
     if (entityIndex > domainIndex) {

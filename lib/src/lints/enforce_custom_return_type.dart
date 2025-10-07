@@ -1,4 +1,4 @@
-import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
+import 'package:analyzer/error/error.dart' show ErrorSeverity;
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
@@ -9,7 +9,7 @@ class EnforceCustomReturnType extends DartLintRule {
   static const _code = LintCode(
     name: 'enforce_custom_return_type',
     problemMessage: 'Methods in this layer must return one of the configured types: {0}.',
-    errorSeverity: DiagnosticSeverity.WARNING,
+    errorSeverity: ErrorSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
@@ -18,7 +18,7 @@ class EnforceCustomReturnType extends DartLintRule {
   EnforceCustomReturnType({required this.config, required this.layerResolver}) : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
     final subLayer = layerResolver.getSubLayer(resolver.source.fullName);
     final typeConfig = config.typeSafety;
     if (typeConfig.returnTypeNames.isEmpty) return;

@@ -1,7 +1,10 @@
+## 1.1.0
+
+* **Fixed:** reduced analyzer version (7.6.0) to avoid conflicts with other packages.
+
 ## 1.0.1
 
 * **Fixed:** `pubspec.yaml` dependencies to reduce conflicts.
-    
 
 ## 1.0.0
 
