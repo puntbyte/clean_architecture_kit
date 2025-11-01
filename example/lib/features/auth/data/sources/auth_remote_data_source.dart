@@ -1,4 +1,4 @@
-import 'package:example/features/auth/data/model/user_model.dart';
+import '../model/user_model.dart';
 
 abstract interface class AuthRemoteDataSource {
   Future<UserModel> getUser(int id);

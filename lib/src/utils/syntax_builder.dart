@@ -1,14 +1,17 @@
+// lib/src/utils/syntax_builder.dart
+
 import 'package:code_builder/code_builder.dart';
 
 // Your brilliant SyntaxBuilder class, almost verbatim.
 class SyntaxBuilder {
   const SyntaxBuilder._();
 
-  static Library library({List<Spec> elements = const [], List<Directive> directives = const []}) =>
-      Library((builder) {
-        builder.body.addAll(elements);
-        builder.directives.addAll(directives);
-      });
+  static Library library({List<Spec> elements = const [], List<Directive> directives = const []}) {
+    return Library((builder) {
+      builder.body.addAll(elements);
+      builder.directives.addAll(directives);
+    });
+  }
 
   static Class class$({
     required String name,

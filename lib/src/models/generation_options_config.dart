@@ -1,3 +1,5 @@
+// lib/src/config/models/generation_options_config.dart
+
 class AnnotationConfig {
   final String importPath;
   final String annotationText;
@@ -22,7 +24,7 @@ class GenerationOptionsConfig {
   factory GenerationOptionsConfig.fromMap(Map<String, dynamic> map) {
     final annotations = map['use_case_annotations'] as List<dynamic>? ?? [];
     return GenerationOptionsConfig(
-      useCaseAnnotations: annotations.map((e) => AnnotationConfig.fromMap(e)).toList(),
+      useCaseAnnotations: annotations.map(AnnotationConfig.fromMap).toList(),
     );
   }
 }

@@ -1,11 +1,10 @@
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/error/error.dart' show ErrorSeverity;
+import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
 import 'package:analyzer/error/listener.dart';
-import 'package:custom_lint_builder/custom_lint_builder.dart';
-
-import 'package:clean_architecture_kit/src/config/models/architecture_kit_config.dart';
+import 'package:clean_architecture_kit/src/models/clean_architecture_config.dart';
 import 'package:clean_architecture_kit/src/utils/layer_resolver.dart';
 import 'package:clean_architecture_kit/src/utils/naming_utils.dart';
+import 'package:custom_lint_builder/custom_lint_builder.dart';
 
 class PresentationLayerPurity extends DartLintRule {
   static const _code = LintCode(
@@ -14,16 +13,19 @@ class PresentationLayerPurity extends DartLintRule {
     correctionMessage:
         'The presentation layer should depend on a specific UseCase, not the entire '
         'repository.',
-    errorSeverity: ErrorSeverity.WARNING,
+    errorSeverity: DiagnosticSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
   final LayerResolver layerResolver;
 
-  PresentationLayerPurity({required this.config, required this.layerResolver}) : super(code: _code);
+  const PresentationLayerPurity({
+    required this.config,
+    required this.layerResolver,
+  }) : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
     final layer = layerResolver.getLayer(resolver.source.fullName);
     if (layer != ArchLayer.presentation) return;
 
@@ -49,7 +51,7 @@ class PresentationLayerPurity extends DartLintRule {
 
         if (typeName.endsWith('?')) typeName = typeName.substring(0, typeName.length - 1);
 
-        if (validateName(name: typeName, template: config.naming.repositoryInterface)) {
+        if (NamingUtils.validateName(name: typeName, template: config.naming.repositoryInterface)) {
           final nameToken = parameter.name;
 
           if (nameToken != null) {

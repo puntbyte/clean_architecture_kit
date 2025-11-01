@@ -1,25 +1,29 @@
-import 'package:analyzer/error/error.dart' show ErrorSeverity;
+// lib/src/lints/enforce_repository_inheritance.dart
+
+import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
 import 'package:analyzer/error/listener.dart';
+import 'package:clean_architecture_kit/src/models/clean_architecture_config.dart';
+import 'package:clean_architecture_kit/src/utils/layer_resolver.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
-import '../config/models/architecture_kit_config.dart';
-import '../utils/layer_resolver.dart';
 
 class EnforceRepositoryInheritance extends DartLintRule {
   static const _code = LintCode(
     name: 'enforce_repository_inheritance',
     problemMessage:
         'Repository interfaces must extend or implement the base repository class `{0}`.',
-    errorSeverity: ErrorSeverity.WARNING,
+    errorSeverity: DiagnosticSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
   final LayerResolver layerResolver;
 
-  EnforceRepositoryInheritance({required this.config, required this.layerResolver})
-    : super(code: _code);
+  const EnforceRepositoryInheritance({
+    required this.config,
+    required this.layerResolver,
+  }) : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
     final subLayer = layerResolver.getSubLayer(resolver.source.fullName);
     if (subLayer != ArchSubLayer.domainRepository) return;
 
@@ -30,11 +34,11 @@ class EnforceRepositoryInheritance extends DartLintRule {
       final baseClassName = config.inheritance.repositoryBaseName;
       if (baseClassName.isEmpty) return;
 
-      bool hasCorrectSuperclass = false;
+      var hasCorrectSuperclass = false;
 
       // Check the 'extends' clause
       final extendsClause = node.extendsClause;
-      if (extendsClause != null && extendsClause.superclass.name2.lexeme == baseClassName) {
+      if (extendsClause != null && extendsClause.superclass.name.lexeme == baseClassName) {
         hasCorrectSuperclass = true;
       }
 
@@ -43,7 +47,7 @@ class EnforceRepositoryInheritance extends DartLintRule {
         final implementsClause = node.implementsClause;
         if (implementsClause != null) {
           for (final interface in implementsClause.interfaces) {
-            if (interface.name2.lexeme == baseClassName) {
+            if (interface.name.lexeme == baseClassName) {
               hasCorrectSuperclass = true;
               break;
             }

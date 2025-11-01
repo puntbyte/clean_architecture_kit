@@ -1,9 +1,8 @@
-import 'package:analyzer/error/error.dart' show ErrorSeverity;
+import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
 import 'package:analyzer/error/listener.dart';
-import 'package:custom_lint_builder/custom_lint_builder.dart';
-
-import 'package:clean_architecture_kit/src/config/models/architecture_kit_config.dart';
+import 'package:clean_architecture_kit/src/models/clean_architecture_config.dart';
 import 'package:clean_architecture_kit/src/utils/layer_resolver.dart';
+import 'package:custom_lint_builder/custom_lint_builder.dart';
 
 /// A lint rule that flags any direct import of a Flutter package
 /// inside a file belonging to the domain layer.
@@ -12,17 +11,19 @@ class DisallowFlutterImportsInDomain extends DartLintRule {
     name: 'disallow_flutter_imports_in_domain',
     problemMessage: 'Do not import Flutter packages in the domain layer.',
     correctionMessage: 'The domain layer must be platform-independent. Remove this import.',
-    errorSeverity: ErrorSeverity.WARNING,
+    errorSeverity: DiagnosticSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
   final LayerResolver layerResolver;
 
-  DisallowFlutterImportsInDomain({required this.config, required this.layerResolver})
-    : super(code: _code);
+  const DisallowFlutterImportsInDomain({
+    required this.config,
+    required this.layerResolver,
+  }) : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
     // Determine the layer of the current file.
     final layer = layerResolver.getLayer(resolver.source.fullName);
     // Only run this lint on files within the domain layer.

@@ -1,8 +1,8 @@
-import 'package:clean_architecture_kit/src/config/models/generation_options_config.dart';
-import 'package:clean_architecture_kit/src/config/models/inheritance_config.dart';
-import 'package:clean_architecture_kit/src/config/models/layer_config.dart';
-import 'package:clean_architecture_kit/src/config/models/naming_config.dart';
-import 'package:clean_architecture_kit/src/config/models/type_safety_config.dart';
+import 'package:clean_architecture_kit/src/models/generation_options_config.dart';
+import 'package:clean_architecture_kit/src/models/inheritance_config.dart';
+import 'package:clean_architecture_kit/src/models/layer_config.dart';
+import 'package:clean_architecture_kit/src/models/naming_config.dart';
+import 'package:clean_architecture_kit/src/models/type_safety_config.dart';
 
 Map<String, dynamic> _getMap(Map<String, dynamic> source, String key) {
   final value = source[key];

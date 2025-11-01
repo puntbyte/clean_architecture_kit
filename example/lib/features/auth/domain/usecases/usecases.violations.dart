@@ -1,4 +1,4 @@
-import 'package:example/core/usecase/usecase.dart';
+import '../../../../core/usecase/usecase.dart';
 
 // VIOLATION: enforce_use_case_inheritance (does not implement a base use case)
 class LogoutUser {
@@ -11,7 +11,7 @@ class Login implements UnaryUsecase<void, void> { // <-- LINT WARNING HERE
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-// VIOLATION: enforce_file_and_folder_location (should be in data/repositories)
+// VIOLATION: enforce_file_and_folder_location (should be in data/contracts)
 class AuthRepositoryImpl { // <-- LINT WARNING HERE
   const AuthRepositoryImpl();
 }

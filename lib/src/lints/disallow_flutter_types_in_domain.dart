@@ -1,11 +1,10 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:analyzer/error/error.dart' show ErrorSeverity;
+import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
 import 'package:analyzer/error/listener.dart';
-import 'package:custom_lint_builder/custom_lint_builder.dart';
-
-import 'package:clean_architecture_kit/src/config/models/architecture_kit_config.dart';
+import 'package:clean_architecture_kit/src/models/clean_architecture_config.dart';
 import 'package:clean_architecture_kit/src/utils/layer_resolver.dart';
+import 'package:custom_lint_builder/custom_lint_builder.dart';
 
 /// A lint rule that flags any usage of a type from the Flutter SDK within the
 /// domain layer. This checks fields, method return types, and parameters.
@@ -14,17 +13,17 @@ class DisallowFlutterTypesInDomain extends DartLintRule {
     name: 'disallow_flutter_types_in_domain',
     problemMessage: 'Domain layer purity violation: Do not use types from the Flutter SDK.',
     correctionMessage: 'Replace this Flutter type with a pure Dart type or a domain Entity.',
-    errorSeverity: ErrorSeverity.WARNING,
+    errorSeverity: DiagnosticSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
   final LayerResolver layerResolver;
 
-  DisallowFlutterTypesInDomain({required this.config, required this.layerResolver})
+  const DisallowFlutterTypesInDomain({required this.config, required this.layerResolver})
     : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
     final layer = layerResolver.getLayer(resolver.source.fullName);
     if (layer != ArchLayer.domain) return;
 
@@ -63,7 +62,7 @@ class DisallowFlutterTypesInDomain extends DartLintRule {
   bool _isFlutterType(DartType type) {
     final library = type.element?.library;
     if (library != null) {
-      final uri = library.library.source.uri;
+      final uri = library.firstFragment.source.uri;
       // Check if the type's source URI is a package and if that package is 'flutter'.
       if (uri.isScheme('package') && uri.pathSegments.first == 'flutter') {
         return true;

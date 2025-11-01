@@ -1,3 +1,5 @@
+// lib/src/config/models/type_safety_config.dart
+
 class TypeSafetyConfig {
   final List<String> returnTypeNames;
   final List<String> importPaths;

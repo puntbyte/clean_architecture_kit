@@ -1,13 +1,15 @@
-import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/element/type.dart';
-import 'package:analyzer/error/error.dart' show ErrorSeverity, AnalysisError;
-import 'package:analyzer/error/listener.dart';
-import 'package:analyzer/dart/ast/token.dart';
-import 'package:custom_lint_builder/custom_lint_builder.dart';
+// lib/src/lints/repository_implementation_purity.dart
 
-import 'package:clean_architecture_kit/src/config/models/architecture_kit_config.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/token.dart';
+import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/diagnostic/diagnostic.dart';
+import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
+import 'package:analyzer/error/listener.dart';
+import 'package:clean_architecture_kit/src/models/clean_architecture_config.dart';
 import 'package:clean_architecture_kit/src/utils/layer_resolver.dart';
 import 'package:clean_architecture_kit/src/utils/naming_utils.dart';
+import 'package:custom_lint_builder/custom_lint_builder.dart';
 
 class RepositoryImplementationPurity extends DartLintRule {
   static const _code = LintCode(
@@ -15,17 +17,19 @@ class RepositoryImplementationPurity extends DartLintRule {
     problemMessage:
         'Repository implementation purity violation: Overridden methods must return '
         'domain Entities, not Models.',
-    errorSeverity: ErrorSeverity.WARNING,
+    errorSeverity: DiagnosticSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
   final LayerResolver layerResolver;
 
-  RepositoryImplementationPurity({required this.config, required this.layerResolver})
-    : super(code: _code);
+  const RepositoryImplementationPurity({
+    required this.config,
+    required this.layerResolver,
+  }) : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
     final subLayer = layerResolver.getSubLayer(resolver.source.fullName);
     if (subLayer != ArchSubLayer.dataRepository) return;
 
@@ -52,13 +56,13 @@ class RepositoryImplementationPurity extends DartLintRule {
         successTypeName = successTypeName.substring(0, successTypeName.length - 1);
       }
 
-      if (validateName(name: successTypeName, template: config.naming.model)) {
+      if (NamingUtils.validateName(name: successTypeName, template: config.naming.model)) {
         reporter.reportError(
-          AnalysisError.forValues(
+          Diagnostic.forValues(
             source: resolver.source,
             offset: node.returnType!.offset,
             length: node.returnType!.length,
-            errorCode: _code,
+            diagnosticCode: _code,
             message: _code.problemMessage,
             correctionMessage:
                 'This method must return a pure Entity, but it returns the Model '

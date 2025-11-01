@@ -1,8 +1,10 @@
-import 'package:example/core/repository/repository.dart';
-import 'package:example/core/utils/types.dart';
+// example/lib/features/auth/domain/contracts/auth_repository.violations.dart
+
+import '../../../../core/repository/repository.dart';
+import '../../../../core/utils/types.dart';
 // VIOLATION: enforce_layer_independence (importing from the data layer)
-import 'package:example/features/auth/data/model/user_model.dart';
-import 'package:example/features/auth/domain/entities/user.dart';
+import '../../data/model/user_model.dart';
+import '../entities/user.dart';
 
 // VIOLATION: enforce_repository_inheritance (does not extend Repository)
 abstract interface class IAnalyticsRepository {

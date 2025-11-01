@@ -1,9 +1,8 @@
-import 'package:analyzer/error/error.dart' show ErrorSeverity;
+import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
 import 'package:analyzer/error/listener.dart';
+import 'package:clean_architecture_kit/src/models/clean_architecture_config.dart';
+import 'package:clean_architecture_kit/src/utils/layer_resolver.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
-
-import '../config/models/architecture_kit_config.dart';
-import '../utils/layer_resolver.dart';
 
 class EnforceLayerIndependence extends DartLintRule {
   static const _code = LintCode(
@@ -11,28 +10,30 @@ class EnforceLayerIndependence extends DartLintRule {
     problemMessage: 'Invalid layer dependency: The {0} layer cannot import from the {1} layer.',
     correctionMessage:
         'Ensure dependencies flow inwards (e.g., Presentation -> Domain, Data -> Domain).',
-    errorSeverity: ErrorSeverity.WARNING,
+    errorSeverity: DiagnosticSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
   final LayerResolver layerResolver;
 
-  EnforceLayerIndependence({required this.config, required this.layerResolver})
-    : super(code: _code);
+  const EnforceLayerIndependence({
+    required this.config,
+    required this.layerResolver,
+  }) : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
     final currentLayer = layerResolver.getLayer(resolver.source.fullName);
     if (currentLayer == ArchLayer.unknown) return;
 
     context.registry.addImportDirective((node) {
-      final importPath = node.libraryImport?.importedLibrary2?.firstFragment.source.fullName;
+      final importPath = node.libraryImport?.importedLibrary?.firstFragment.source.fullName;
       if (importPath == null) return;
 
       final importedLayer = layerResolver.getLayer(importPath);
       if (importedLayer == ArchLayer.unknown || importedLayer == currentLayer) return;
 
-      bool isViolation = false;
+      var isViolation = false;
       if (currentLayer == ArchLayer.domain) {
         if (importedLayer == ArchLayer.data || importedLayer == ArchLayer.presentation) {
           isViolation = true;

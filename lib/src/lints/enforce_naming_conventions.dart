@@ -1,25 +1,29 @@
-import 'package:analyzer/error/error.dart' show ErrorSeverity;
+// lib/src/lints/enforce_naming_conventions.dart
+
+import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
 import 'package:analyzer/error/listener.dart';
+import 'package:clean_architecture_kit/src/models/clean_architecture_config.dart';
+import 'package:clean_architecture_kit/src/utils/layer_resolver.dart';
+import 'package:clean_architecture_kit/src/utils/naming_utils.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
-import '../config/models/architecture_kit_config.dart';
-import '../utils/layer_resolver.dart';
-import '../utils/naming_utils.dart';
 
 class EnforceNamingConventions extends DartLintRule {
   static const _code = LintCode(
     name: 'enforce_naming_conventions',
     problemMessage: 'The class name `{0}` does not match the configured format: `{1}`.',
-    errorSeverity: ErrorSeverity.WARNING,
+    errorSeverity: DiagnosticSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
   final LayerResolver layerResolver;
 
-  EnforceNamingConventions({required this.config, required this.layerResolver})
-    : super(code: _code);
+  const EnforceNamingConventions({
+    required this.config,
+    required this.layerResolver,
+  }) : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
     final subLayer = layerResolver.getSubLayer(resolver.source.fullName);
     if (subLayer == ArchSubLayer.unknown) return;
 
@@ -29,7 +33,7 @@ class EnforceNamingConventions extends DartLintRule {
       if (template == null || template.isEmpty) return;
 
       final className = node.name.lexeme;
-      if (!validateName(name: className, template: template)) {
+      if (!NamingUtils.validateName(name: className, template: template)) {
         reporter.atToken(node.name, _code, arguments: [className, template]);
       }
     });
@@ -37,20 +41,13 @@ class EnforceNamingConventions extends DartLintRule {
 
   /// Selects the correct naming convention template based on the file's sub-layer
   /// and whether the class itself is abstract or concrete.
-  String? _getTemplate(ArchSubLayer subLayer, bool isAbstract) {
-    switch (subLayer) {
-      case ArchSubLayer.domainRepository:
-        return isAbstract ? config.naming.repositoryInterface : null;
-      case ArchSubLayer.dataRepository:
-        return isAbstract ? null : config.naming.repositoryImplementation;
-      case ArchSubLayer.dataSource:
-        return isAbstract
-            ? config.naming.dataSourceInterface
-            : config.naming.dataSourceImplementation;
-      case ArchSubLayer.useCase:
-        return isAbstract ? null : config.naming.useCase;
-      default:
-        return null;
-    }
-  }
+  String? _getTemplate(ArchSubLayer subLayer, bool isAbstract) => switch (subLayer) {
+    ArchSubLayer.domainRepository => isAbstract ? config.naming.repositoryInterface : null,
+    ArchSubLayer.dataRepository => isAbstract ? null : config.naming.repositoryImplementation,
+    ArchSubLayer.dataSource => isAbstract
+        ? config.naming.dataSourceInterface
+        : config.naming.dataSourceImplementation,
+    ArchSubLayer.useCase => isAbstract ? null : config.naming.useCase,
+    _ => null,
+  };
 }

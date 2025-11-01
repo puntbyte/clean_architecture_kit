@@ -102,11 +102,11 @@ custom_lint:
       layer_definitions:
         domain:
           entities: ['entities']
-          repositories: ['repositories']
+          repositories: ['contracts']
           use_cases: ['usecases']
         data:
-          repositories: ['repositories']
-          data_sources: ['datasources']
+          repositories: ['contracts']
+          data_sources: ['sources']
           models: ['models']
         presentation:
           managers: ['bloc', 'cubit', 'provider']

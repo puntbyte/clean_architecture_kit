@@ -1,8 +1,11 @@
-import 'package:example/core/utils/types.dart';
-import 'package:example/features/auth/data/datasources/auth_remote_data_source.dart';
-import 'package:example/features/auth/data/model/user_model.dart';
-import 'package:example/features/auth/domain/repositories/auth_repository.dart';
+// example/lib/features/auth/data/repositories/auth_repository_impl.violations.dart
+
 import 'package:fpdart/fpdart.dart';
+
+import '../../../../core/utils/types.dart';
+import '../../domain/contracts/auth_repository.dart';
+import '../model/user_model.dart';
+import '../sources/auth_remote_data_source.dart';
 
 class BadDependencyRepositoryImpl implements AuthRepository {
   // VIOLATION: enforce_abstract_data_source_dependency (depends on concrete implementation)

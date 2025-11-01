@@ -1,8 +1,7 @@
 import 'package:bloc/bloc.dart';
-import 'package:example/features/auth/domain/usecases/get_current_user_usecase.dart';
 
-// This is a placeholder for a real BLoC.
-// Notice it correctly depends on a UseCase, not a Repository.
+import '../../domain/usecases/get_current_user_usecase.dart';
+
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final GetCurrentUserUsecase _getCurrentUser;
 

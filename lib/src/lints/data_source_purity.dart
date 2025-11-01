@@ -1,29 +1,27 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:analyzer/error/error.dart' show ErrorSeverity;
+import 'package:analyzer/error/error.dart' show DiagnosticSeverity;
 import 'package:analyzer/error/listener.dart';
-import 'package:clean_architecture_kit/src/config/models/architecture_kit_config.dart';
-import 'package:custom_lint_builder/custom_lint_builder.dart';
-
+import 'package:clean_architecture_kit/src/models/clean_architecture_config.dart';
 import 'package:clean_architecture_kit/src/utils/layer_resolver.dart';
+import 'package:custom_lint_builder/custom_lint_builder.dart';
 
 class DataSourcePurity extends DartLintRule {
   static const _code = LintCode(
     name: 'data_source_purity',
     problemMessage: 'DataSource purity violation: DataSources should not use domain Entities.',
-    correctionMessage:
-        'DataSources should return Models/DTOs, not Entities. The repository '
+    correctionMessage: 'DataSources should return Models/DTOs, not Entities. The repository '
         'implementation is responsible for mapping.',
-    errorSeverity: ErrorSeverity.WARNING,
+    errorSeverity: DiagnosticSeverity.WARNING,
   );
 
   final CleanArchitectureConfig config;
   final LayerResolver layerResolver;
 
-  DataSourcePurity({required this.config, required this.layerResolver}) : super(code: _code);
+  const DataSourcePurity({required this.config, required this.layerResolver}) : super(code: _code);
 
   @override
-  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
+  void run(CustomLintResolver resolver, DiagnosticReporter reporter, CustomLintContext context) {
     final subLayer = layerResolver.getSubLayer(resolver.source.fullName);
     if (subLayer != ArchSubLayer.dataSource) return;
 
@@ -43,11 +41,11 @@ class DataSourcePurity extends DartLintRule {
   bool _isDomainEntity(DartType type) {
     final library = type.element?.library;
     if (library != null) {
-      final sourcePath = library.library.source.fullName;
+      final sourcePath = library.firstFragment.source.fullName;
       final typeLayer = layerResolver.getLayer(sourcePath);
 
       if (typeLayer == ArchLayer.domain) {
-        final pathSegments = sourcePath.replaceAll('\\', '/').split('/');
+        final pathSegments = sourcePath.replaceAll(r'\', '/').split('/');
 
         final entityDirs = config.layers.domainEntitiesPaths;
 

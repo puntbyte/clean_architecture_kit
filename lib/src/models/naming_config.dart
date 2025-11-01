@@ -1,3 +1,5 @@
+// lib/src/config/models/naming_config.dart
+
 class NamingConfig {
   final String useCase;
   final String useCaseRecordParameter;
@@ -5,6 +7,7 @@ class NamingConfig {
   final String repositoryImplementation;
   final String dataSourceInterface;
   final String dataSourceImplementation;
+
   // ADD THIS NEW PROPERTY
   final String model;
 
@@ -23,12 +26,11 @@ class NamingConfig {
       useCase: map['use_case'] as String? ?? '{{name}}Usecase',
       useCaseRecordParameter: map['use_case_record_parameter'] as String? ?? '_{{name}}Parameter',
       repositoryInterface: map['repository_interface'] as String? ?? '{{name}}Repository',
-      repositoryImplementation:
-          map['repository_implementation'] as String? ?? '{{name}}RepositoryImpl',
+      repositoryImplementation: map['repository_implementation'] as String?
+          ?? '{{name}}RepositoryImpl',
       dataSourceInterface: map['data_source_interface'] as String? ?? '{{name}}DataSource',
-      dataSourceImplementation:
-          map['data_source_implementation'] as String? ?? '{{name}}DataSourceImpl',
-      // PARSE THE NEW PROPERTY
+      dataSourceImplementation: map['data_source_implementation'] as String?
+          ?? '{{name}}DataSourceImpl',
       model: map['model'] as String? ?? '{{name}}Model',
     );
   }
